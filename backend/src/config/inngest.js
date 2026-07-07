@@ -1,11 +1,12 @@
-import inngest from "inngest";
+import { Inngest } from "inngest";
 import { connectDB } from "./db.js";
 import { User } from "../models/user.model.js";
 
-export const syncUser = inngest.createFunction(
-  { id: "sync-user" },
-  { event: "clerk/user.created" },
-  async ({ event }) => {
+export const inngest = new Inngest({ id: "kacar-expoCommerce" });
+
+const syncUser = inngest.createFunction(
+  { id: "sync-user", triggers: [{ event: "clerk/user.created" }] },
+  async ({ event, step }) => {
     await connectDB();
     const { id, email_addresses, first_name, last_name, image_url } =
       event.data;
@@ -15,7 +16,7 @@ export const syncUser = inngest.createFunction(
       email: email_addresses[0]?.email_address,
       name: `${first_name || ""} ${last_name || ""}` || "User",
       imageUrl: image_url,
-      adresses: [],
+      addresses: [],
       wishlist: [],
     };
 
@@ -23,9 +24,8 @@ export const syncUser = inngest.createFunction(
   },
 );
 
-export const deleteUserFromDB = inngest.createFunction(
-  { id: "delete-user-from-db" },
-  { event: "clerk/user.deleted" },
+const deleteUserFromDB = inngest.createFunction(
+  { id: "delete-user-from-db", event: "clerk/user.deleted" },
   async ({ event }) => {
     await connectDB();
     const { id } = event.data;
