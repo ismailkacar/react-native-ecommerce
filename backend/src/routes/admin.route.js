@@ -1,13 +1,17 @@
 import { Router } from "express";
 import { createProduct } from "../controllers/admin.controller.js";
 import { adminOnly, protectRoute } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
 router.use(protectRoute, adminOnly);
 
-router.post("/products", createProduct);
+router.post("/products", upload.array("image", 3), createProduct);
 router.get("/products", getAllProducts);
-router.put("/products/:id", updateProduct);
+router.put("/products/:id", upload.array("image", 3), updateProduct);
+
+router.get("/orders", getAllOrders);
+router.patch("/orders/:orderId/status", updateOrderStatus);
 
 export default router;
